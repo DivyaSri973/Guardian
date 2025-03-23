@@ -1,14 +1,14 @@
-from app.classifier import is_offensive
+from app.classifier import is_offensive, is_sexist
 from app.config import SLACK_BOT_TOKEN
 from slack_bolt import App
 from slack_sdk.errors import SlackApiError
+from app.utils import report_message
 
 app = App(token=SLACK_BOT_TOKEN)
 
 @app.event("message")
 def handle_message(event, client, logger):
-    print("✅ Message event triggered")
-    print(f"Full event: {event}")
+    print("\u2705 Message event triggered")
     text = event.get("text", "")
     sender = event.get("user")
     channel = event.get("channel")
@@ -16,29 +16,44 @@ def handle_message(event, client, logger):
     if 'bot_id' in event:
         return
 
+    reasons = []
     if is_offensive(text):
+        reasons.append("Offensive Language")
+    if is_sexist(text):
+        reasons.append("Sexist Language")
+
+    if reasons:
         members = client.conversations_members(channel=channel)["members"]
         bot_id = client.auth_test()["user_id"]
-        receiver = next((u for u in members if u != sender and u != bot_id), None)
+        sender_info = client.users_info(user=sender)
+        sender_name = sender_info["user"]["real_name"]
+        sender_mention = f"<@{sender}>"
+        receivers = [u for u in members if u != sender and u != bot_id]
+        reason_text = ", ".join(reasons)
+        print(reason_text)
 
-        if receiver:
+        for receiver in receivers:
             try:
                 client.chat_postMessage(
                     channel=receiver,
-                    text="⚠️ A recent message might be inappropriate.",
+                    text=f"\u26a0\ufe0f Message from {sender_name} may be inappropriate.",
                     blocks=[
                         {
                             "type": "section",
-                            "text": {"type": "mrkdwn", "text": "*Do you want to report this to HR?*"}
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": f"\ud83d\udea8 *{reason_text} message detected from {sender_mention}:*\n\n```{text}```\n\nDo you want to report this to HR?"
+                            }
                         },
                         {
                             "type": "actions",
                             "elements": [
                                 {
                                     "type": "button",
-                                    "text": {"type": "plain_text", "text": "Report"},
+                                    "text": {"type": "plain_text", "text": "Report to HR"},
                                     "style": "danger",
-                                    "action_id": "report_btn"
+                                    "action_id": "report_btn",
+                                    "value": f"{sender_name}|{text}|{reason_text}|{receiver}"
                                 },
                                 {
                                     "type": "button",
@@ -51,12 +66,16 @@ def handle_message(event, client, logger):
                     ]
                 )
             except SlackApiError as e:
-                logger.error(f"Slack API error: {e}")
+                logger.error(f"Slack API error for {receiver}: {e}")
 
 @app.action("report_btn")
 def report_action(ack, body, client):
+    # print("\ud83d\udd34 Report action triggered")
     ack()
     user = body["user"]["id"]
+    value = body["actions"][0]["value"]
+    sender_name, message, reasons, _ = value.split("|", 3)
+    report_message(sender_name, message, reasons.split(", "))
     client.chat_postMessage(channel=user, text="✅ Report sent to HR.")
 
 @app.action("dismiss_btn")
@@ -64,3 +83,10 @@ def dismiss_action(ack, body, client):
     ack()
     user = body["user"]["id"]
     client.chat_postMessage(channel=user, text="👍 Okay, no action taken.")
+
+@app.event({"type": "message"})
+def catch_all_messages(event, logger):
+    logger.info("\ud83d\df29\ufe0f CATCH-ALL: Received message event")
+    logger.info(event)
+    # print("\ud83d\df29\ufe0f CATCH-ALL: Event triggered")
+    print(event)
