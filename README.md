@@ -124,6 +124,3 @@ The app should now be running and listening for events from your Slack workspace
 
 Contributions are welcome! If you find a bug or have a feature request, please open an issue or submit a pull request.
 
-## License
-
-[Specify the license under which the project is released]
