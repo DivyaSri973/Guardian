@@ -4,6 +4,15 @@
 
 Guardian is a Slack app designed to detect and flag potential workplace harassment within Slack channels. It uses a pre-trained Natural Language Processing (NLP) model to analyze messages and identify offensive content. The app aims to create a safer and more respectful work environment by providing real-time feedback and alerts.
 
+## Problem Statement
+Most of the solutions to harassment detection in workplace depends primarily on manual reporting procedures which often fail to capture the full extent of the issue. Victims frequently hesitate to report incidents due to fear of retaliation, lack of trust in the system, or uncertainty about the consequences. As a result, many cases of harassment go unreported, allowing toxic behaviors to persist unchecked. 
+
+## Impact of Solution
+Our solution proactively detects offensive language in real-time and empowers users by requesting confirmation before escalating issues. By continuously monitoring interactions, it helps create a safer, more respectful workspace while minimizing false escalations. This approach not only fosters a culture of accountability and inclusivity but also enhances trust and well-being in professional environments.
+
+## TechStack Used
+NLP, Slack 
+
 ## Codebase Structure
   todo
   
@@ -119,6 +128,12 @@ The app should now be running and listening for events from your Slack workspace
 3. **Review and Adjust**:
 
     Review the flagged messages and adjust the app's settings or model as needed to improve accuracy.
+
+## Future scope
+1. To ensure long-term effectiveness, the model must be frequently re-trained to adapt to evolving language patterns, emerging slang, and nuanced forms of harassment, maintaining high detection accuracy. 
+2. Additionally, expanding the model with multilingual capabilities will enhance its usability across diverse countries and organizations, fostering a more inclusive and globally adaptable solution. 
+3. Future advancements could integrate contextual AI to better understand intent, improve real-time adaptability through continuous learning, and incorporate multimodal analysis by combining speech, text, and facial expression recognition for more precise harassment detection.
+
 
 ## Contributing
 
