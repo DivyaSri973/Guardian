@@ -1,0 +1,5 @@
+.env
+venv
+model_tokenizer/
+inference.py
+sexism_comments_detection_model/
